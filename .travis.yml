@@ -1,0 +1,25 @@
+language: ruby
+rvm:
+- 2.6.4
+dist:
+  - trusty
+before_install:
+  - gem install bundler
+bundler_args: --jobs=2
+script:
+  - bundle exec rails db:migrate RAILS_ENV=test
+  - bundle exec rspec
+before_script:
+  - cp config/database.yml.travis config/database.yml
+  - psql -c 'create database travis_ci_test;' -U postgres
+cache: bundler
+services:
+  - redis-server
+addons:
+  postgresql: "9.4"
+deploy:
+  # Build Docker container and push to Docker Hub
+  provider: script
+  script: bash deploy.sh
+  on:
+    branch: milestone0/cicd
